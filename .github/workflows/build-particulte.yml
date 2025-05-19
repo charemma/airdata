@@ -1,0 +1,27 @@
+name: Publish particulate-exporter
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'airdata/particulate/**'
+      - '.github/workflows/build-particulate.yml'
+
+jobs:
+  particulate-build:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write   # GHCR Push
+      id-token: write   # Dagger OIDC Auth
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build
+        uses: dagger/dagger-for-github@8.0.0
+        with:
+          workdir: airdata/particulate
+          call: build

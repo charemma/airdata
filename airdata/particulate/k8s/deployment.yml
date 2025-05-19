@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: airdata-particulate
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: airdata-particulate
+  template:
+    metadata:
+      labels:
+        app: airdata-particulate
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+    spec:
+      nodeSelector:
+        sensor-type: particulate  # deploy on nodes with this label
+      containers:
+        - name: exporter
+          image: ttl.sh/charemma/airdata-exporter-particulate:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          volumeMounts:
+            - name: sensor-dev
+              mountPath: /dev/ttyUSB0
+          securityContext:
+            privileged: true  # für Zugriff auf USB-Gerät
+      volumes:
+        - name: sensor-dev
+          hostPath:
+            path: /dev/ttyUSB0
+            type: CharDevice
